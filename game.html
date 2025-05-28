@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CheckMates-Start Game</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+  <div class="overlay">
+    <h1 class="title">♛ CheckMates</h1>
+
+    <div class="controls glass">
+      <label for="boardSize">Enter Board Size (N):</label>
+      <input type="number" id="boardSize" min="4" value="4">
+      <button onclick="startGame()">Start Game</button>
+    </div>
+
+    <div class="main-container">
+      <div id="board" class="board glass"></div>
+
+      <div class="side-panel glass">
+        <button onclick="solveAutomatically()">Auto Solve</button>
+        <button onclick="pauseResume()"><span id="pauseBtn">Pause</span></button>
+        <div id="timer">⏱ Time: 0s</div>
+        <div id="highscore">🏆 Best Time: --</div>
+      </div>
+    </div>
+
+    <div id="explanation" class="explanation glass">
+      <strong>Instructions:</strong>
+      <p>
+        • Click on a cell to place a queen.<br>
+        • Only one queen allowed per row.<br>
+        • Queens must not attack each other (no same column or diagonal).<br>
+        • Use "Auto Solve" to see backtracking in action.<br>
+        • Use "Pause/Resume" to control solving.
+      </p>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
