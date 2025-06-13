@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instructions - N Queen Problem</title>
+  <link rel="stylesheet" href="instruction.css" />
+</head>
+<body>
+  <div id="instruction-container">
+    <h1 class="animated-title">♛ Welcome to the N-Queens Challenge ♛</h1>
+
+    <section class="card">
+      <h2>🧠 What is the N-Queen Problem?</h2>
+      <p>
+        The N-Queen problem is a classic computer science puzzle that involves placing <strong>N</strong> queens on an <strong>N×N</strong> chessboard such that no two queens attack each other.
+      </p>
+      <img src="https://media.geeksforgeeks.org/wp-content/uploads/20230915155502/1.png" alt="N Queen Example" />
+    </section>
+
+    <section class="card">
+      <h2>📏 Rules</h2>
+      <ul>
+        <li>Only one queen per row and column</li>
+        <li>No two queens can share the same diagonal</li>
+        <li>Valid solutions must place N queens on the board</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>💡 Algorithm Used: Backtracking</h2>
+      <p>
+        Backtracking is a recursive algorithm that tries to place a queen in a valid position row-by-row. If it reaches a dead-end, it <em>backtracks</em> and tries a different path.
+      </p>
+      <pre class="code-block">
+function solveNQueens(board, row) {
+  if (row == N) return true;
+  for (let col = 0; col < N; col++) {
+    if (isSafe(board, row, col)) {
+      board[row][col] = 1;
+      if (solveNQueens(board, row + 1)) return true;
+      board[row][col] = 0; // backtrack
+    }
+  }
+  return false;
+}
+      </pre>
+    </section>
+
+    <section class="card">
+      <h2>⏱️ Time & Space Complexity</h2>
+      <p><strong>Time Complexity:</strong> O(N!)<br>
+         <strong>Space Complexity:</strong> O(N²) for the board</p>
+    </section>
+
+    <button id="back-btn">🔙 Back to Main Menu</button>
+  </div>
+
+  <script>
+    document.getElementById("back-btn").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+  </script>
+</body>
+</html>

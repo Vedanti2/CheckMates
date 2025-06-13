@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>N-Queens Visualizer</title>
+  <style>
+    body {
+      background-color: rgb(26, 26, 26);
+      color: white;
+      font-family: 'Noto Sans', sans-serif;
+      margin: 25px;
+      text-align: center;
+    }
+    #title-hr {
+      margin: 0 25px 35px 25px;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      min-height: 65vh;
+    }
+    #input-section {
+      background: rgb(34, 34, 34);
+      padding: 15px 20px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      position: sticky;
+      top: 0;
+      width: 320px;
+    }
+    #input-section label {
+      color: white;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    #value-of-n {
+      width: 70px;
+      border-radius: 8px;
+      border: none;
+      padding: 6px 10px;
+      font-size: 16px;
+    }
+    #start-visualization {
+      background-color: rgb(238, 24, 24);
+      border-radius: 8px;
+      border: none;
+      color: white;
+      padding: 8px 20px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-left: 12px;
+      margin-top: 15px;
+      margin-bottom: 15px;
+    }
+    #n-queens-visualizer-section {
+      background: rgb(34, 34, 34);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 90vw;
+      overflow-x: auto;
+    }
+    table {
+      border-collapse: collapse;
+      margin: 0 auto;
+      color: white;
+    }
+    table, td, th {
+      border: 1px solid white;
+    }
+    td {
+      width: 38px;
+      height: 38px;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 28px;
+      font-weight: bold;
+      user-select: none;
+    }
+    td.blue-background {
+      background-color: #1ff414;
+    }
+    td.queen-cell {
+      color: gold;
+      text-shadow: 0 0 4px #ffd700;
+    }
+    #log-section {
+      background: rgb(20, 20, 20);
+      border-radius: 12px;
+      max-width: 90vw;
+      margin: 0 auto;
+      padding: 10px 15px;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 14px;
+      text-align: left;
+      color: #ccc;
+      font-family: monospace;
+      white-space: pre-wrap;
+      box-sizing: border-box;
+    }
+    p.blue-background {
+      color: #aaf;
+      margin: 2px 0;
+    }
+    p.green-background {
+      color: #7f7;
+      margin: 2px 0;
+    }
+    p.red-background {
+      color: #f77;
+      margin: 2px 0;
+    }
+    p.orange-background {
+      color: #fca;
+      margin: 2px 0;
+      font-style: italic;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>&#9813; CheckMates: N-Queens Visualizer &#9813;</h1>
+    <hr id="title-hr" />
+  
+  </header>
+  <main>
+    <section id="input-section">
+      <label for="value-of-n">Value Of N (1-10):</label>
+      <input id="value-of-n" type="number" min="1" max="10" placeholder="?" />
+      <button id="start-visualization">Start Visualization</button>
+    </section>
+    <section id="n-queens-visualizer-section" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+      
+    </section>
+    <section id="log-section" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+      <p>Detailed explanations will be provided here.</p>
+    </section>
+  </main>
+
+<script>
+const nQueensVisualizerSection = document.getElementById("n-queens-visualizer-section");
+const logSection = document.getElementById("log-section");
+const startBtn = document.getElementById("start-visualization");
+const inputN = document.getElementById("value-of-n");
+
+let animations = [];
+let animationIndex = 0;
+let animationRunning = false;
+let animationSpeed = 700;
+
+let countOfChessBoards = 1;
+
+function clearVisualsAndLogs() {
+  nQueensVisualizerSection.innerHTML = "";
+  logSection.innerHTML = "";
+}
+
+function scrollLogBottom() {
+  logSection.scrollTop = logSection.scrollHeight;
+}
+
+function addLog(message, className="") {
+  const p = document.createElement("p");
+  p.textContent = message;
+  if (className) p.classList.add(className);
+  logSection.appendChild(p);
+  scrollLogBottom();
+}
+
+function generateTableOfSizeN(n, tableNumber) {
+  const tbl = document.createElement("table");
+  tbl.id = "chess-board-" + tableNumber;
+
+  const caption = document.createElement("caption");
+  caption.textContent = "Chessboard - " + tableNumber + " of size " + n + " x " + n;
+  tbl.appendChild(caption);
+
+  const tbody = document.createElement("tbody");
+
+  for (let i = 0; i < n; i++) {
+    const row = document.createElement("tr");
+    row.id = `table-${tableNumber}-row-${i+1}`;
+    for (let j = 0; j < n; j++) {
+      const cell = document.createElement("td");
+      cell.id = `table-${tableNumber}-row-${i+1}-col-${j+1}`;
+      row.appendChild(cell);
+    }
+    tbody.appendChild(row);
+  }
+  tbl.appendChild(tbody);
+  nQueensVisualizerSection.appendChild(tbl);
+}
+
+function cloneTableOfSizeN(n, tableNumber) {
+  const lastTable = nQueensVisualizerSection.lastElementChild;
+  const clone = lastTable.cloneNode(true);
+  clone.id = "chess-board-" + tableNumber;
+
+  const oldCaption = clone.querySelector("caption");
+  const newCaption = document.createElement("caption");
+  newCaption.textContent = "Chessboard - " + tableNumber + " of size " + n + " x " + n;
+  clone.replaceChild(newCaption, oldCaption);
+
+  const rows = clone.querySelectorAll("tr");
+  rows.forEach((row, i) => {
+    row.id = `table-${tableNumber}-row-${i+1}`;
+    const cells = row.querySelectorAll("td");
+    cells.forEach((cell, j) => {
+      cell.id = `table-${tableNumber}-row-${i+1}-col-${j+1}`;
+      cell.textContent = "";
+      cell.className = "";
+    });
+  });
+
+  nQueensVisualizerSection.appendChild(clone);
+}
+
+const queenEmoji = "♛";
+function addQueen(row, col, tableNumber) {
+  const cell = document.getElementById(`table-${tableNumber}-row-${row+1}-col-${col+1}`);
+  if(cell) {
+    cell.textContent = queenEmoji;
+    cell.classList.add("queen-cell");
+  }
+  addLog(`Added Queen at (${row+1}, ${col+1}) on Board #${tableNumber}`, "green-background");
+}
+
+function removeQueen(row, col, tableNumber) {
+  const cell = document.getElementById(`table-${tableNumber}-row-${row+1}-col-${col+1}`);
+  if(cell) {
+    cell.textContent = "";
+    cell.classList.remove("queen-cell");
+  }
+  addLog(`Removed Queen from (${row+1}, ${col+1}) on Board #${tableNumber} (Backtracking)`, "orange-background");
+}
+
+function markCurrentSquareBlue(row, col, tableNumber) {
+  const cell = document.getElementById(`table-${tableNumber}-row-${row+1}-col-${col+1}`);
+  if(cell) {
+    cell.classList.add("blue-background");
+  }
+  addLog(`Checking position (${row+1}, ${col+1}) on Board #${tableNumber}`, "blue-background");
+}
+
+function removeSquareColor(row, col, tableNumber) {
+  const cell = document.getElementById(`table-${tableNumber}-row-${row+1}-col-${col+1}`);
+  if(cell) {
+    cell.classList.remove("blue-background");
+  }
+}
+
+// Enhanced isQueenSafe with detailed log for rejection reasons
+function isQueenSafe(chess, row, col) {
+  // Check left diagonal
+  for(let i=row-1, j=col-1; i>=0 && j>=0; i--, j--){
+    if(chess[i][j] === 1) {
+      addLog(`Cannot place at (${row+1},${col+1}): Conflict with queen at (${i+1},${j+1}) on left diagonal`, "red-background");
+      return false;
+    }
+  }
+  // Check column
+  for(let i=row-1; i>=0; i--){
+    if(chess[i][col] === 1) {
+      addLog(`Cannot place at (${row+1},${col+1}): Conflict with queen at (${i+1},${col+1}) in same column`, "red-background");
+      return false;
+    }
+  }
+  // Check right diagonal
+  for(let i=row-1, j=col+1; i>=0 && j<chess.length; i--, j++){
+    if(chess[i][j] === 1){
+      addLog(`Cannot place at (${row+1},${col+1}): Conflict with queen at (${i+1},${j+1}) on right diagonal`, "red-background");
+      return false;
+    }
+  }
+  return true;
+}
+
+let animationCollection = [];
+function printNQueens(chess, row) {
+  if (row === chess.length) {
+    countOfChessBoards++;
+    animationCollection.push([cloneTableOfSizeN, [chess.length, countOfChessBoards]]);
+    addLog(`Solution #${countOfChessBoards-1} found, cloning board to show next possibilities.`, "green-background");
+    return;
+  }
+  for(let col=0; col<chess.length; col++){
+    animationCollection.push([markCurrentSquareBlue, [row,col,countOfChessBoards]]);
+    if(chess[row][col] === 0 && isQueenSafe(chess, row, col)) {
+      chess[row][col] = 1;
+      animationCollection.push([markCurrentSquareBlue, [row,col,countOfChessBoards]]);
+      animationCollection.push([addQueen, [row,col,countOfChessBoards]]);
+      animationCollection.push([removeSquareColor, [row,col,countOfChessBoards]]);
+      printNQueens(chess, row + 1);
+      chess[row][col] = 0;
+      animationCollection.push([removeQueen, [row,col,countOfChessBoards]]);
+      addLog(`Backtracking from (${row+1},${col+1}) on Board #${countOfChessBoards} to try next position.`, "orange-background");
+    } else if(chess[row][col] === 0){
+      // Logging for positions rejected due to isQueenSafe failing is already handled inside isQueenSafe
+      animationCollection.push([removeSquareColor, [row,col,countOfChessBoards]]);
+    }
+  }
+}
+
+function getAnimationsArr(n) {
+  countOfChessBoards = 1;
+  animationCollection = [];
+  let chess = new Array(n);
+  for(let i=0;i<n;i++){
+    chess[i] = new Array(n).fill(0);
+  }
+  printNQueens(chess, 0);
+  return animationCollection;
+}
+
+let currentAnimationIndex = 0;
+let animationPlaying = false;
+
+function runNextAnimation() {
+  if(currentAnimationIndex >= animations.length) {
+    animationPlaying = false;
+    addLog(`Visualization completed! Total solutions: ${countOfChessBoards - 1}`, "green-background");
+    return;
+  }
+  const [fn, params] = animations[currentAnimationIndex];
+  fn(...params);
+  currentAnimationIndex++;
+  setTimeout(runNextAnimation, animationSpeed);
+}
+
+function startVisualization(n) {
+  if(animationPlaying){
+    alert("Visualization already running. Please wait.");
+    return;
+  }
+  clearVisualsAndLogs();
+  if(isNaN(n) || n < 1 || n > 10){
+    alert("Please enter a valid number between 1 and 10.");
+    return;
+  }
+  currentAnimationIndex = 0;
+  animations = [];
+  animationPlaying = true;
+  generateTableOfSizeN(n, 1);
+  animations = getAnimationsArr(n);
+  runNextAnimation();
+}
+
+startBtn.addEventListener("click", () => {
+  const n = parseInt(inputN.value.trim(), 10);
+  startVisualization(n);
+});
+</script>
+</body>
+</html>
+
