@@ -36,3 +36,4 @@ It helps users understand algorithmic thinking through step-by-step visual expla
 ---
 
 ✨ *Learning algorithms by visualizing how they work.*
+
